@@ -1,7 +1,17 @@
 #include <Arduino.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
 #define Enc_SW 4
 #define Enc_DT 3
 #define Enc_CLK 2
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
 
 int Enc_Counter = 1;
 int Enc_clockState = 0;
@@ -22,12 +32,20 @@ pinMode(Enc_DT, INPUT);
 pinMode(Enc_CLK, INPUT);
 pinMode(Enc_SW, INPUT_PULLUP);
 
+display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+display.clearDisplay();
+display.setTextSize(5);
+display.setTextColor(WHITE);
+display.setCursor(40, 20);
+
+
 
 Enc_lastClockState = digitalRead(Enc_CLK);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+  bool counterUpdate = false;
 
   Enc_clockState = digitalRead(Enc_CLK);
   if (Enc_clockState != Enc_lastClockState){
@@ -46,12 +64,20 @@ void loop() {
       }
       
     }
-    
+    counterUpdate = true;
   }
 
   Enc_lastClockState = Enc_clockState;
 
-  Serial.println(Enc_Counter);
+  //Serial.println(Enc_Counter);
+  if (counterUpdate) {
+    display.setCursor(40, 20);
+    display.println(Enc_Counter);
+    display.display();
+    //delay(10);
+    display.clearDisplay();
+  }
+
 
   int Enc_butState = digitalRead(Enc_SW);
   if (Enc_butState == LOW){
@@ -75,10 +101,20 @@ void loop() {
       minutesLeft = intTimeLeft/60;
       secondsLeft = intTimeLeft%60;
 
-      Serial.print(minutesLeft);
-      Serial.print(" : ");
-      Serial.println(secondsLeft);
-      Serial.println("YAYAYYAY WE DID IT!");
+      display.setTextSize(2);
+
+      display.setCursor(20, 20);
+      //Serial.print(minutesLeft);
+      display.print(minutesLeft);
+      //display.display();
+      //Serial.print(" : ");
+      display.print(" : ");
+      //display.display();
+      //Serial.println(secondsLeft);
+      display.println(secondsLeft);
+      display.display();
+      //delay(100);
+      display.clearDisplay();
     }
     
 
